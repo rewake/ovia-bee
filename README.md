@@ -1,64 +1,105 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Ovia Backend Engineering Exercise
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Feature Planning
 
-## About Laravel
+### Incentive System Process Flowchart
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The following Design Flowchart illustrates the initial concept of how the Incentive System might work.
+This design takes advantage of the following design patterns to accomplish the proposed functionality
+while maintaining code clarity and separation of concerns:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* Service Oriented Architecture
+* Event Driven Architecture
+* Adapter/Interface Pattern
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+[Click Here to View Incentive System Design Flowchart](https://whimsical.com/ovia-incentives-feature-V1XeSrEHQEK3m3gkEb8VhQ)
 
-## Learning Laravel
+### Code Flow
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. User performs an incentive action, which is stored in the `user_incentives` table
+2. A Model Observer listens for created and updated Model Events
+3. When Model Events are fired, the Incentive Service is called to process the Incentive Data
+4. If an Incentive is processed and is deemed Complete, the `user_incentives` table is updated, and the Incentive Complete Event is fired
+5. Any related Event Listeners fire and perform their necessary actions
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Caching
 
-## Laravel Sponsors
+To increase performance, we can use caching for Incentive API routes. This would mean that direct database
+calls would not be needed when clients hit our API. In general, an exceptionally high level of 
+consistency "should" not be needed here (assumption), so delays in cache invalidation or 
+rebuild are likely acceptable.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Caching can be accomplished in the following manner:
 
-### Premium Partners
+* There is a command which will build the User Incentive cache
+* This command can be used to warm and rebuild the cache as needed, and
+* This command can be run at a given interval using the job schedule (ie. cron), or
+* This command can also be added to our Model Observer methods to rebuild the cache whenever inserts/updates occur
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
+### Incentives Tables Design Diagram
 
-## Contributing
+The Diagram below represents the initial table design needed to implement the Incentives feature. The tables shown represent only the new tables needed, not the entirety of the database design.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+![alt text](docs/img/OviaIncentivesEER.png)
 
-## Code of Conduct
+#### Incentive Data
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Incentive dat will be stored as a JSON object, which will allow each incentive to 
+have its own specific data model, without the need to update any tables, fields, etc.
 
-## Security Vulnerabilities
+#### Example Incentive Data
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Birth Record:
+```json
+{
+    "date": "2021-09-15 17:15:00"
+}
+```
 
-## License
+Heath Data Log:
+```json
+[
+    {
+        "data": [
+            {
+              "type": "mood",
+              "value": "happy"
+            },{
+              "type": "symptom",
+              "value": "cough"
+            }
+        ],
+        "date": "2021-09-15 17:15:00"
+    },{
+        "data": [
+            {
+                "type": "mood",
+                "value": "tired"
+            }
+        ],
+        "date": "2021-09-14 22:22:00"
+    }
+]
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Data Sharing with External Systems
+
+Assuming there's an existing client-side API in place, we would simply extend the API so that this new incentive
+data is accessible via the API. Potential API endpoints could be written as follows:
+
+`GET /user/incentives`
+
+* Returns all incentives the User has on record, including the status and related data for each.
+
+`GET /user/incentive/{id}`
+
+* Returns the incentive data for the given `id`
+
+`GET /user/rewards`
+
+* Returns all rewards the User has won
+
+## Additional Steps
+
+* Writing tests for these new features
+* Finish Cache command and wiring, after discussion on preferred/needed method of rebuild
