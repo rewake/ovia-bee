@@ -18,22 +18,22 @@ while maintaining code clarity and separation of concerns:
 
 1. User performs an incentive action, which is stored in the `user_incentives` table
 2. A Model Observer listens for created and updated Model Events
-3. When Model Events are fired, the Incentive Service is called to process the Incentive Data
+3. Model Events are fired, and Incentive Service is used to process the Incentive Data
 4. If an Incentive is processed and is deemed Complete, the `user_incentives` table is updated, and the Incentive Complete Event is fired
-5. Any related Event Listeners fire and perform their necessary actions
+5. Any active Incentive Complete Event Listeners execute and perform necessary actions
 
 ### Caching
 
 To increase performance, we can use caching for Incentive API routes. This would mean that direct database
 calls would not be needed when clients hit our API. In general, an exceptionally high level of 
-consistency "should" not be needed here (assumption), so delays in cache invalidation or 
+consistency "should" not be needed here (assumption), so delays in cache invalidation and/or 
 rebuild are likely acceptable.
 
 Caching can be accomplished in the following manner:
 
 * There is a command which will build the User Incentive cache
 * This command can be used to warm and rebuild the cache as needed, and
-* This command can be run at a given interval using the job schedule (ie. cron), or
+* This command can be run at a given interval using the job schedule (ie. cron), and/or
 * This command can also be added to our Model Observer methods to rebuild the cache whenever inserts/updates occur
 
 ### Incentives Tables Design Diagram
@@ -44,8 +44,8 @@ The Diagram below represents the initial table design needed to implement the In
 
 #### Incentive Data
 
-Incentive dat will be stored as a JSON object, which will allow each incentive to 
-have its own specific data model, without the need to update any tables, fields, etc.
+Incentive data will be stored as a JSON object, which will allow each Incentive to 
+have its own specific data model, without the need to constanlt modify any tables, fields, etc.
 
 #### Example Incentive Data
 
@@ -85,7 +85,7 @@ Heath Data Log:
 ### Data Sharing with External Systems
 
 Assuming there's an existing client-side API in place, we would simply extend the API so that this new incentive
-data is accessible via the API. Potential API endpoints could be written as follows:
+data is accessible via the API. Potential API endpoints could be constructed as follows:
 
 `GET /user/incentives`
 
@@ -103,3 +103,5 @@ data is accessible via the API. Potential API endpoints could be written as foll
 
 * Writing tests for these new features
 * Finish Cache command and wiring, after discussion on preferred/needed method of rebuild
+* Creating new API endpoints
+* etc
