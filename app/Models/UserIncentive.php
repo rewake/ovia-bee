@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class UserIncentives extends Model
+class UserIncentive extends Model
 {
     use HasFactory;
+
+    protected $table = 'user_incentives';
 
     public function incentive(): HasOne
     {
@@ -21,4 +23,9 @@ class UserIncentives extends Model
     }
 
     // TODO: company relationship
+
+    public function getDataAttribute($value)
+    {
+        return json_decode($value);
+    }
 }

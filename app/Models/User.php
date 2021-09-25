@@ -45,6 +45,6 @@ class User extends Authenticatable
 
     public function incentives(): HasMany
     {
-        return $this->hasMany(UserIncentives::class);
+        return $this->hasMany(UserIncentive::class);
     }
 }

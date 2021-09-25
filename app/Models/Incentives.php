@@ -12,7 +12,7 @@ class Incentives extends Model
 
     public function userIncentives(): HasMany
     {
-        return $this->hasMany(UserIncentives::class, 'incentive_id');
+        return $this->hasMany(UserIncentive::class, 'incentive_id');
     }
 
     // TODO: company relationship
