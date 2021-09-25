@@ -10,11 +10,16 @@ class UserIncentive extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'completed',
+        'completed_at',
+    ];
+
     protected $table = 'user_incentives';
 
     public function incentive(): HasOne
     {
-        return $this->hasOne(Incentives::class);
+        return $this->hasOne(Incentives::class, 'id');
     }
 
     public function user(): HasOne
