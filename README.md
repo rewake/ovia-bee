@@ -45,13 +45,14 @@ The Diagram below represents the initial table design needed to implement the In
 #### Incentive Data
 
 Incentive data will be stored as a JSON object, which will allow each Incentive to 
-have its own specific data model, without the need to constanlt modify any tables, fields, etc.
+have its own specific data model, without the need to constantly modify any tables, fields, etc.
 
 #### Example Incentive Data
 
 Birth Record:
 ```json
 {
+    "birth_date": "2021-09-15 15:30:00",
     "date": "2021-09-15 17:15:00"
 }
 ```
